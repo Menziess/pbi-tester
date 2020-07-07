@@ -119,7 +119,7 @@ socket.on('config', data => {
     ? 0
     : sessionStorage.getItem('reloadCounter');
 
-  startTime = sessionStorage.getItem('originalStartTime') ?? startTime;
+  startTime = sessionStorage.getItem('originalStartTime') ? sessionStorage.getItem('originalStartTime') : startTime;
 
   var errorTracker = "";
   var report;
@@ -175,7 +175,7 @@ function EmbedReport(
     var currTime = new Date();
 
     var avgDuration = Math.round((((currTime - startTime) - (thinkTimeSeconds * loadCounter * 1000)) / loadCounter)) / 1000;
-    var currDuration = Math.round((((currTime - (prevTime ?? startTime)) - (thinkTimeSeconds * 1000)) / 1)) / 1000;
+    var currDuration = Math.round((((currTime - (prevTime ? prevTime : startTime)) - (thinkTimeSeconds * 1000)) / 1)) / 1000;
 
     divCounter.innerHTML = loadCounter
       + " refreshes<br/>"
