@@ -4,6 +4,10 @@ Special thanks to [DavidMagarMS's](https://github.com/microsoft/PowerBI-Tools-Fo
 
 A nodejs server that serves a powerbi dashboard, and keeps refreshing it, sending back metrics to the server via websockets.
 
+<img src="res/testing-powerbi-reports.PNG" alt="Testing PowerBI reports overview" width="750"/>
+
+This project contains all required components for setting up a "realistic" stress test for a single PowerBI report, where the report can be loaded by many workers by browsing to a webpage that is hosted by a nodejs webserver that requires a single token. The workers can be replicated as containers in a kubernetes cluster, as Azure Container Instances, or simply by human beings opening browser tabs. The data is stored as lines of json, containing (average) refresh times, timestamps, and browser tab id's.
+
 ## 1. Development
 
 The [`Makefile`](Makefile) contains all required commands for building, publishing and deploying to Azure Container Instances.
