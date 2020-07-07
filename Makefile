@@ -6,6 +6,8 @@ AZ_RESOURCE_GROUP=myresourcegroup
 AZ_STORAGE_ACCOUNT_NAME=mystorageaccount
 AZ_LOCATION=westeurope
 DOCKER_REGISTRY=mydockeruser
+ACI_CPU=2
+ACI_MEMORY=3
 
 
 help:
@@ -26,13 +28,17 @@ dockerize:
 publish:
 	docker push $$DOCKER_REGISTRY/$$NAME:latest
 
-run: dockerize
+run-server: dockerize
 	docker run --rm -it \
-  -e ENV=production \
-	-p 80:80 \
-	$$DOCKER_REGISTRY/$$NAME:latest
+		-e ENV=production \
+		-p 80:80 \
+		-v /private:/app/private
+		$$DOCKER_REGISTRY/$$NAME:latest
 
-deploy:
+run-client:
+	docker run -d --rm menziess/pbi-tab
+
+deploy-server:
 	@echo Deploying to $$AZ_SUBSCRIPTION
 
 	# Create the storage account with the parameters
@@ -49,7 +55,13 @@ deploy:
 		--account-name $$AZ_STORAGE_ACCOUNT_NAME \
 		--name $$NAME
 
-	# Free App plan
+	# Remove any containers with same id
+	az container delete \
+		--subscription $$AZ_SUBSCRIPTION \
+		--resource-group $$AZ_RESOURCE_GROUP \
+		--name $$NAME
+
+	# ACI
 	az container create \
 		--subscription $$AZ_SUBSCRIPTION \
 		--resource-group $$AZ_RESOURCE_GROUP \
@@ -60,16 +72,24 @@ deploy:
 		--azure-file-volume-account-name $$AZ_STORAGE_ACCOUNT_NAME \
 		--azure-file-volume-account-key $$(az storage account keys list --resource-group $$AZ_RESOURCE_GROUP --account-name $$AZ_STORAGE_ACCOUNT_NAME --query "[0].value" --output tsv) \
 		--azure-file-volume-share-name $$NAME \
-		--azure-file-volume-mount-path /app/logs
+		--azure-file-volume-mount-path /app/logs \
+		--cpu $$ACI_CPU \
+		--memory $$ACI_MEMORY
 
-provision-vm:
-	az vm create \
-  --resource-group $$AZ_RESOURCE_GROUP \
-  --name $$NAME \
-	--image Win2012R2Datacenter \
-  --admin-username azureuser \
-  --generate-ssh-keys \
-  --public-ip-address-allocation static
+deploy-client:
+	@echo Install "az aks install-cli"
+	az aks create \
+		--subscription $$AZ_SUBSCRIPTION \
+		--resource-group $$AZ_RESOURCE_GROUP \
+		--name $$NAME
+
+	az aks get-credentials \
+		--subscription $$AZ_SUBSCRIPTION \
+		--resource-group $$AZ_RESOURCE_GROUP \
+		--name $$NAME
+		--overwrite-existing
+
+	kubectl apply -f client-deployment.yaml
 
 generate-token:
 	@echo 1. Install powershell for linux https://docs.microsoft.com/en-us/powershell/scripting/install/installing-powershell-core-on-linux?view=powershell-7

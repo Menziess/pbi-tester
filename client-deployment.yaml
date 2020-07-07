@@ -1,0 +1,21 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: pbi-tab
+spec:
+  selector:
+    matchLabels:
+      app: pbi-tab
+  replicas: 20
+  template:
+    metadata:
+      labels:
+        app: pbi-tab
+    spec:
+      containers:
+      - name: pbi-tab
+        image: menziess/pbi-tab
+        resources:
+          requests:
+            memory: "100M"
+            cpu: "0.1"
