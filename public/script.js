@@ -12,11 +12,26 @@ var socket = io({ transports: ['websocket'] });
 var startTime = new Date();
 var id = guid();
 
-socket.on('config', data => {
-  var token = data.token;
-  var PBIEtoken = token.PBIToken;
+function GetQSParam(name, url) {
+  var results = new RegExp('[?&]' + name + '=([^&#]*)').exec(url);
+  if (results == null) {
+    return 0;
+  }
+  return results[1] || 0;
+}
 
+socket.on('config', (data) => {
+  var token = data.token;
   var reportParameters = data.report;
+
+  if (!token || !reportParameters) {
+    var status = document.getElementById('status');
+    status.innerHTML = '';
+    if (!token) status.innerHTML += 'No token set.<br>';
+    if (!reportParameters) status.innerHTML += 'No report set.<br>';
+  }
+
+  var PBIEtoken = token.PBIToken;
   var embedUrl = reportParameters.reportUrl;
   var filterStart = reportParameters.filterStart;
   var filterMax = reportParameters.filterMax;
@@ -27,7 +42,8 @@ socket.on('config', data => {
     var arrFilterCounter = Array(reportParameters.filters.length);
     var filterCombinations = 1;
     for (var i = 0; i < reportParameters.filters.length; i++) {
-      filterCombinations = filterCombinations * reportParameters.filters[i].filtersList.length;
+      filterCombinations =
+        filterCombinations * reportParameters.filters[i].filtersList.length;
       arrFilterCounter[i] = 0;
     }
 
@@ -35,59 +51,73 @@ socket.on('config', data => {
     for (var i = 0; i < filterCombinations; i++) {
       filtersList[i] = {
         slicers: [],
-        filters: []
+        filters: [],
       };
       for (var j = 0; j < reportParameters.filters.length; j++) {
         var v = reportParameters.filters[j].filtersList[arrFilterCounter[j]];
 
         var filter = {
-          $schema: "http://powerbi.com/product/schema#basic",
+          $schema: 'http://powerbi.com/product/schema#basic',
           target: {
             table: reportParameters.filters[j].filterTable,
-            column: reportParameters.filters[j].filterColumn
+            column: reportParameters.filters[j].filterColumn,
           },
-          operator: "In",
-          values: (v != null ? (Array.isArray(v) ? v : [v]) : reportParameters.filters[j].filtersList.filter(function (a) { return a != null; })),
-          filterType: 1
+          operator: 'In',
+          values:
+            v != null
+              ? Array.isArray(v)
+                ? v
+                : [v]
+              : reportParameters.filters[j].filtersList.filter(function (a) {
+                  return a != null;
+                }),
+          filterType: 1,
         };
 
-        var slicer =
-        {
+        var slicer = {
           selector: {
-            $schema: "http://powerbi.com/product/schema#slicerTargetSelector",
+            $schema: 'http://powerbi.com/product/schema#slicerTargetSelector',
             target: {
               table: reportParameters.filters[j].filterTable,
-              column: reportParameters.filters[j].filterColumn
-            }
+              column: reportParameters.filters[j].filterColumn,
+            },
           },
           state: {
             filters: [
               {
-                $schema: "http://powerbi.com/product/schema#basic",
+                $schema: 'http://powerbi.com/product/schema#basic',
                 target: {
                   table: reportParameters.filters[j].filterTable,
-                  column: reportParameters.filters[j].filterColumn
+                  column: reportParameters.filters[j].filterColumn,
                 },
-                operator: "In",
-                values: (v != null ? (Array.isArray(v) ? v : [v]) : reportParameters.filters[j].filtersList.filter(function (a) { return a != null; }))
-              }
-            ]
-          }
+                operator: 'In',
+                values:
+                  v != null
+                    ? Array.isArray(v)
+                      ? v
+                      : [v]
+                    : reportParameters.filters[j].filtersList.filter(function (
+                        a
+                      ) {
+                        return a != null;
+                      }),
+              },
+            ],
+          },
         };
 
         if (reportParameters.filters[j].isSlicer)
           filtersList[i].slicers.push(slicer);
-        else
-          filtersList[i].filters.push(filter);
-
-
+        else filtersList[i].filters.push(filter);
       }
       for (var z = reportParameters.filters.length - 1; z >= 0; z--) {
-        if (arrFilterCounter[z] + 1 < reportParameters.filters[z].filtersList.length) {
+        if (
+          arrFilterCounter[z] + 1 <
+          reportParameters.filters[z].filtersList.length
+        ) {
           arrFilterCounter[z]++;
           z = -1;
-        }
-        else {
+        } else {
           arrFilterCounter[z] = 0;
         }
       }
@@ -103,25 +133,28 @@ socket.on('config', data => {
   }
 
   var bookmarkList = reportParameters.bookmarkList;
-  if (bookmarkList == null || bookmarkList == undefined || bookmarkList == "") {
-    bookmarkList = [""];
+  if (bookmarkList == null || bookmarkList == undefined || bookmarkList == '') {
+    bookmarkList = [''];
   }
 
   var thinkTimeSeconds = reportParameters.thinkTimeSeconds;
-  thinkTimeSeconds = (thinkTimeSeconds == null ? 0 : thinkTimeSeconds);
+  thinkTimeSeconds = thinkTimeSeconds == null ? 0 : thinkTimeSeconds;
   var pageName = reportParameters.pageName;
-  pageName = (pageName == undefined ? null : pageName);
+  pageName = pageName == undefined ? null : pageName;
   var layoutType = reportParameters.layoutType;
-  layoutType = (layoutType == undefined ? "Master" : layoutType);
+  layoutType = layoutType == undefined ? 'Master' : layoutType;
   var sessionRestart = reportParameters.sessionRestart;
-  var reportId = GetQSParam("reportId", embedUrl);
-  var loadCounter = sessionStorage.getItem('reloadCounter') === null
-    ? 0
-    : sessionStorage.getItem('reloadCounter');
+  var reportId = GetQSParam('reportId', embedUrl);
+  var loadCounter =
+    sessionStorage.getItem('reloadCounter') === null
+      ? 0
+      : sessionStorage.getItem('reloadCounter');
 
-  startTime = sessionStorage.getItem('originalStartTime') ? sessionStorage.getItem('originalStartTime') : startTime;
+  startTime = sessionStorage.getItem('originalStartTime')
+    ? sessionStorage.getItem('originalStartTime')
+    : startTime;
 
-  var errorTracker = "";
+  var errorTracker = '';
   var report;
 
   EmbedReport(
@@ -167,22 +200,37 @@ function EmbedReport(
 ) {
   if (!socket.connected) {
     errorTracker = 'Socket disconnected.';
-  };
+  }
   if (errorTracker.length != 0) return;
-  if (report != undefined) report.off("rendered");
+  if (report != undefined) report.off('rendered');
   if (loadCounter > 0) {
     var divCounter = document.getElementById('LoadReportCounter');
     var currTime = new Date();
 
-    var avgDuration = Math.round((((currTime - startTime) - (thinkTimeSeconds * loadCounter * 1000)) / loadCounter)) / 1000;
-    var currDuration = Math.round((((currTime - (prevTime ? prevTime : startTime)) - (thinkTimeSeconds * 1000)) / 1)) / 1000;
+    var avgDuration =
+      Math.round(
+        (currTime - startTime - thinkTimeSeconds * loadCounter * 1000) /
+          loadCounter
+      ) / 1000;
+    var currDuration =
+      Math.round(
+        (currTime -
+          (prevTime ? prevTime : startTime) -
+          thinkTimeSeconds * 1000) /
+          1
+      ) / 1000;
 
-    divCounter.innerHTML = loadCounter
-      + " refreshes<br/>"
-      + currDuration + " seconds current refresh time<br/>"
-      + avgDuration + " seconds average refresh time<br/>"
-      + thinkTimeSeconds + " seconds think time<br/>"
-      + "tab id: " + id;
+    divCounter.innerHTML =
+      loadCounter +
+      ' refreshes<br/>' +
+      currDuration +
+      ' seconds current refresh time<br/>' +
+      avgDuration +
+      ' seconds average refresh time<br/>' +
+      thinkTimeSeconds +
+      ' seconds think time<br/>' +
+      'tab id: ' +
+      id;
 
     socket.emit('metric', {
       tabId: id,
@@ -190,25 +238,24 @@ function EmbedReport(
       avgDuration: avgDuration,
       currDuration: currDuration,
       thinkTimeSeconds: thinkTimeSeconds,
-    })
+    });
   }
 
   var models = window['powerbi-client'].models;
-  var filterCounter = Math.floor(loadCounter / bookmarkList.length) % filtersCount;
+  var filterCounter =
+    Math.floor(loadCounter / bookmarkList.length) % filtersCount;
   var bookmarkCounter = loadCounter % bookmarkList.length;
   var bookmarkValue = bookmarkList[bookmarkCounter];
   if (filtersList != null) {
     if (isNaN(filterCounter)) {
       filterValue = {
         slicers: [],
-        filters: []
+        filters: [],
       };
-    }
-    else {
+    } else {
       filterValue = filtersList[filterCounter];
     }
-  }
-  else if (bookmarkCounter == 0) {
+  } else if (bookmarkCounter == 0) {
     filterValue = filterValue < filterMax ? ++filterValue : filterStart;
   }
 
@@ -225,8 +272,8 @@ function EmbedReport(
     settings: {
       filterPaneEnabled: true,
       navContentPaneEnabled: true,
-      layoutType: models.LayoutType[layoutType]
-    }
+      layoutType: models.LayoutType[layoutType],
+    },
   };
 
   var justFlipBookmark = true;
@@ -235,21 +282,44 @@ function EmbedReport(
     justFlipBookmark = false;
   }
 
-  report.on("error", function (event) {
-
+  report.on('error', function (event) {
     var divCounter = document.getElementById('LoadReportCounter');
     var currentTime = new Date().toTimeString();
-    divCounter.innerHTML = divCounter.innerHTML
-      + "<br/>[Error at " + currentTime + "] "
-      + event.detail.detailedMessage + " "
-      + event.detail.errorCode;
+    divCounter.innerHTML =
+      divCounter.innerHTML +
+      '<br/>[Error at ' +
+      currentTime +
+      '] ' +
+      event.detail.detailedMessage +
+      ' ' +
+      event.detail.errorCode;
 
-    report.off("error");
+    report.off('error');
 
     errorTracker = event.detail.message;
   });
 
-  report.on("rendered", function () { setTimeout(EmbedReport(errorTracker, report, loadCounter, bookmarkList, filtersCount, filtersList, PBIEtoken, embedUrl, reportId, pageName, layoutType, sessionRestart, thinkTimeSeconds, currTime), thinkTimeSeconds * 1000) });
+  report.on('rendered', function () {
+    setTimeout(
+      EmbedReport(
+        errorTracker,
+        report,
+        loadCounter,
+        bookmarkList,
+        filtersCount,
+        filtersList,
+        PBIEtoken,
+        embedUrl,
+        reportId,
+        pageName,
+        layoutType,
+        sessionRestart,
+        thinkTimeSeconds,
+        currTime
+      ),
+      thinkTimeSeconds * 1000
+    );
+  });
 
   if (justFlipBookmark) {
     report.bookmarksManager.apply(bookmarkValue);
@@ -257,19 +327,9 @@ function EmbedReport(
 
   loadCounter++;
 
-  if ((loadCounter % sessionRestart) === 0) {
+  if (loadCounter % sessionRestart === 0) {
     sessionStorage.setItem('reloadCounter', loadCounter);
     sessionStorage.setItem('originalStartTime', startTime);
     location.reload(false);
-  };
-}
-
-function GetQSParam(name, url) {
-
-  var results = new RegExp('[\?&]' + name + '=([^&#]*)').exec(url);
-
-  if (results == null) {
-    return 0;
   }
-  return results[1] || 0;
 }

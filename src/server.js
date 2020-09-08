@@ -11,11 +11,9 @@ const bodyparser = require('body-parser');
 const jsonparser = bodyparser.json();
 
 const port = process.env.PORT || 80;
+const db = {};
 
-let token = JSON.parse(fs.readFileSync('private/PBIToken.json', 'utf8'));
-let report = JSON.parse(fs.readFileSync('public/PBIReport.json', 'utf8'));
-
-// Open prompt, asking number of chrome tabs required
+// Open prompt, asking number of chrome tabs required (for local testing)
 promptOpenUrlInNumerousTabs = (url) => {
   const input = readline.createInterface({
     input: process.stdin,
@@ -43,11 +41,12 @@ serve = () => {
   // Endpoint for updating token
   app.post('/token', jsonparser, (req, res) => {
     try {
-      fs.writeFileSync(
-        path.resolve('private/PBIToken.json'),
-        JSON.stringify(req.body)
-      );
-      token = req.body;
+      db.token = req.body;
+      console.log('Sent new token');
+      io.emit('config', {
+        token: db.token,
+        report: db.report,
+      });
       res.sendStatus(200);
     } catch (e) {
       res.send(e);
@@ -57,11 +56,12 @@ serve = () => {
   // Endpoint for updating report
   app.post('/report', jsonparser, (req, res) => {
     try {
-      fs.writeFileSync(
-        path.resolve('public/PBIReport.json'),
-        JSON.stringify(req.body)
-      );
-      token = req.body;
+      db.report = req.body;
+      console.log('Sent new report');
+      io.emit('config', {
+        token: db.token,
+        report: db.report,
+      });
       res.sendStatus(200);
     } catch (e) {
       res.send(e);
@@ -74,8 +74,8 @@ serve = () => {
     console.log('New tab connected');
 
     socket.emit('config', {
-      token: token,
-      report: report,
+      token: db.token,
+      report: db.report,
     });
 
     socket.on('metric', (data) => {
