@@ -8,6 +8,10 @@ function guid() {
   return s4() + s4() + '-' + s4();
 }
 
+function isEmptyObj(obj) {
+  return Object.keys(obj).length === 0 && obj.constructor === Object;
+}
+
 var socket = io({ transports: ['websocket'] });
 var startTime = new Date();
 var id = guid();
@@ -24,12 +28,15 @@ socket.on('config', (data) => {
   var token = data.token;
   var reportParameters = data.report;
 
-  if (!token || !reportParameters) {
-    var status = document.getElementById('status');
-    status.innerHTML = '';
-    if (!token) status.innerHTML += 'No token set.<br>';
-    if (!reportParameters) status.innerHTML += 'No report set.<br>';
+  var status = document.getElementById('status');
+  status.innerHTML = '';
+  if (!token || isEmptyObj(token)) {
+    status.innerHTML += 'No token set.<br>';
   }
+  if (!reportParameters || isEmptyObj(reportParameters)) {
+    status.innerHTML += 'No report set.<br>';
+  }
+  console.log(data);
 
   var PBIEtoken = token.PBIToken;
   var embedUrl = reportParameters.reportUrl;
