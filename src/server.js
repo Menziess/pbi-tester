@@ -1,5 +1,5 @@
-const readline = require("readline");
-const express = require("express");
+const readline = require('readline');
+const express = require('express');
 const path = require('path');
 const open = require('open');
 const app = express();
@@ -7,6 +7,8 @@ const fs = require('fs');
 
 const http = require('http').Server(app);
 const io = require('socket.io')(http);
+const bodyparser = require('body-parser');
+const jsonparser = bodyparser.json();
 
 const port = process.env.PORT || 80;
 
@@ -21,35 +23,49 @@ promptOpenUrlInNumerousTabs = (url) => {
   });
   input.question('How many tabs would you like to open?\n', (ans) => {
     const n = parseInt(ans);
-    Array(n).fill().forEach((_, i) => {
-      open(url, { app: ['chrome'] });
-    });
-  })
-}
+    Array(n)
+      .fill()
+      .forEach((_, i) => {
+        open(url, { app: ['chrome'] });
+      });
+  });
+};
 
 serve = () => {
-
   // Static files
-  app.use(express.static('public'))
+  app.use(express.static('public'));
 
   // Just the index page
   app.get('/', (req, res) => {
     res.sendFile(path.resolve('index.html'));
   });
 
-  // Endpoint for updating token / report definition
-  app.get('/set', (req, res) => {
-
-    if (req.query.token) {
-      fs.writeFileSync(path.resolve('private/PBIToken.json'), req.query.token);
-      token = JSON.parse(req.query.token);
+  // Endpoint for updating token
+  app.post('/token', jsonparser, (req, res) => {
+    try {
+      fs.writeFileSync(
+        path.resolve('private/PBIToken.json'),
+        JSON.stringify(req.body)
+      );
+      token = req.body;
+      res.sendStatus(200);
+    } catch (e) {
+      res.send(e);
     }
-    if (req.query.report) {
-      fs.writeFileSync(path.resolve('public/PBIReport.json'), req.query.report);
-      report = JSON.parse(req.query.report);
-    }
+  });
 
-    res.sendStatus(200);
+  // Endpoint for updating report
+  app.post('/report', jsonparser, (req, res) => {
+    try {
+      fs.writeFileSync(
+        path.resolve('public/PBIReport.json'),
+        JSON.stringify(req.body)
+      );
+      token = req.body;
+      res.sendStatus(200);
+    } catch (e) {
+      res.send(e);
+    }
   });
 
   // Socket connection to gather the metrics
@@ -65,14 +81,10 @@ serve = () => {
     socket.on('metric', (data) => {
       data.timeStamp = new Date().toISOString();
       const body = JSON.stringify(data) + ',\n';
-      fs.appendFile(
-        'logs/log.json',
-        body,
-        (err) => {
-          if (err) throw err;
-          console.log(body);
-        }
-      );
+      fs.appendFile('logs/log.json', body, (err) => {
+        if (err) throw err;
+        console.log(body);
+      });
     });
 
     socket.on('disconnect', () => {
@@ -82,10 +94,10 @@ serve = () => {
 
   // Start server
   http.listen(port, () => {
-    const url = `http://localhost:${port}`
+    const url = `http://localhost:${port}`;
     promptOpenUrlInNumerousTabs(url);
     console.log(`listening on ${url}`);
   });
-}
+};
 
 serve();

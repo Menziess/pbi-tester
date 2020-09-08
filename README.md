@@ -14,46 +14,46 @@ The [`Makefile`](Makefile) contains all required commands for building, publishi
 
 1. Run `make install` (requires `yarn` and `node`)
 2. Start the server:
-    ```bash
-    export PORT=3000
-    make dev
-    ```
-    or on Windows:
-    ```cmd
-    set PORT=3000
-    node src/server.js
-    ```
+   ```bash
+   export PORT=3000
+   make dev
+   ```
+   or on Windows:
+   ```cmd
+   set PORT=3000
+   node src/server.js
+   ```
 3. Repeat step 2 after changing any server-side code.
    Simply refresh your browser tab (using `CTRL + SHIFT + R`) when you're only modifying client-side code.
 4. Dockerize your changes (requires docker)
-    ```bash
-    make dockerize
-    ```
+   ```bash
+   make dockerize
+   ```
 5. Spin up a container to see whether it functions
-    ```bash
-    make run
-    ```
+   ```bash
+   make run
+   ```
 6. Push the changes to a docker registry
-    ```bash
-    make publish
-    ```
+   ```bash
+   make publish
+   ```
 7. Deploy your image to ACI (Azure Container Instances)
-    ```bash
-    make deploy-server
-    ```
+   ```bash
+   make deploy-server
+   ```
 
 ## 2. Server Usage
 
 A token (that expires after 60 minutes) is required, which can be generated using the [`token.ps1`](token.ps1) powershell script.
 
 1. Generate a token:
-    ```bash
-    make generate-token
-    ```
-    or on Windows:
-    ```bash
-    powershell ./token.ps1
-    ```
+   ```bash
+   make generate-token
+   ```
+   or on Windows:
+   ```bash
+   powershell ./token.ps1
+   ```
 2. Deploy the solution, following the steps in [Development](#development)
 3. Depending on the `NAME` variable in the [`Makefile`](Makefile), you should be able to visit your powerbi tester page: http://pbi-tester.westeurope.azurecontainer.io
 4. You can now update the token, by browsing to: `http://pbi-tester.westeurope.azurecontainer.io/set?token={"PBIToken":"secret"}`, replacing the "secret" with the value of your generated token
@@ -79,7 +79,10 @@ A container has been developed that -- on startup -- opens a firefox tab with ur
 
 ## Improvements
 
+- Multiple report endpoints
 - Making the url configurable for the `menziess/pbi-tab` container
+  - through env variables k8s
+  - through websockets
 - Starting multiple tabs per `pbi-tab` container
 - Using Web Workers to prevent background tabs to become idle
 - Improve script for tabs to wait until server becomes available so that a restart is not required
