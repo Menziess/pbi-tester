@@ -97,4 +97,4 @@ generate-token:
 	@echo
 	@echo 2. Install powerbi module for powershell https://docs.microsoft.com/en-us/powershell/power-bi/overview?view=powerbi-ps
 	@echo
-	pwsh token.ps1
+	cd private && pwsh generate_token.ps1

@@ -44,7 +44,7 @@ The [`Makefile`](Makefile) contains all required commands for building, publishi
 
 ## 2. Server Usage
 
-A token (that expires after 60 minutes) is required, which can be generated using the [`token.ps1`](token.ps1) powershell script.
+A token (that expires after 60 minutes) is required, which can be generated using the [`generate_token.ps1`](private/generate_token.ps1) powershell script.
 
 1. Generate a token:
    ```bash
@@ -52,7 +52,7 @@ A token (that expires after 60 minutes) is required, which can be generated usin
    ```
    or on Windows:
    ```bash
-   powershell ./token.ps1
+   powershell ./private/generate_token.ps1
    ```
 2. Deploy the solution, following the steps in [Development](#development)
 3. Depending on the `NAME` variable in the [`Makefile`](Makefile), you should be able to visit your powerbi tester page: http://pbi-tester.westeurope.azurecontainer.io

@@ -8,7 +8,6 @@ RUN npm install
 
 COPY src/ src/
 COPY public/ public/
-COPY private/ private/
 COPY index.html .
 
 EXPOSE 2222 80 443
