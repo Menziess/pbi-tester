@@ -47,6 +47,7 @@ deploy-server:
 		--resource-group $$AZ_RESOURCE_GROUP \
 		--name $$AZ_STORAGE_ACCOUNT_NAME \
 		--location $$AZ_LOCATION \
+		--kind StorageV2 \
 		--sku Standard_LRS
 
 	# Create fileshares
