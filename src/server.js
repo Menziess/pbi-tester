@@ -107,6 +107,7 @@ serve = () => {
   // Stop clients
   app.post('/stop', jsonparser, (_, res) => {
     db.active_report = '_';
+    db.token = {};
     // Trigger refresh on all clients
     io.emit('refresh');
     res.sendStatus(200);
