@@ -10,11 +10,21 @@ const io = require('socket.io')(http);
 const bodyparser = require('body-parser');
 const jsonparser = bodyparser.json();
 
+// Set port for server
 const port = process.env.PORT || 80;
+
+// Read reports.json to pre-populate available reports
+const reports = () => {
+  const reports_path = 'public/reports.json';
+  if (!fs.existsSync(reports_path)) return {};
+  return JSON.parse(fs.readFileSync(reports_path, 'utf8'));
+};
+
+// Keep in-memory database
 const db = {
-  reports: {
+  reports: Object.assign({}, reports(), {
     _: {},
-  },
+  }),
   token: {},
   active_report: '_',
 };
@@ -33,10 +43,6 @@ promptOpenUrlInNumerousTabs = (url) => {
         open(url, { app: ['chrome'] });
       });
   });
-};
-
-sleep = (ms) => {
-  return new Promise((resolve) => setTimeout(resolve, ms));
 };
 
 serve = () => {
