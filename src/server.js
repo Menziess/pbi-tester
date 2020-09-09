@@ -11,7 +11,13 @@ const bodyparser = require('body-parser');
 const jsonparser = bodyparser.json();
 
 const port = process.env.PORT || 80;
-const db = {};
+const db = {
+  reports: {
+    _: {},
+  },
+  token: {},
+  active_report: '_',
+};
 
 // Open prompt, asking number of chrome tabs required (for local testing)
 promptOpenUrlInNumerousTabs = (url) => {
@@ -27,6 +33,10 @@ promptOpenUrlInNumerousTabs = (url) => {
         open(url, { app: ['chrome'] });
       });
   });
+};
+
+sleep = (ms) => {
+  return new Promise((resolve) => setTimeout(resolve, ms));
 };
 
 serve = () => {
@@ -45,15 +55,22 @@ serve = () => {
 
   // Remove report by id
   app.delete('/report/:id', (req, res) => {
-    delete db.reports[req.params.id];
+    const id = req.params.id;
+    if (id == '_') {
+      return res.sendStatus(403);
+    }
+    if (!(id in db.tokens)) {
+      return res.sendStatus(404);
+    }
+    if (id == db.reports.active_report) {
+      db.reports.active_report = '_';
+    }
+    delete db.reports[id];
     res.sendStatus(200);
   });
 
   // Save report by id
   app.post('/report/:id', jsonparser, (req, res) => {
-    if (!db.reports) {
-      db.reports = {};
-    }
     try {
       db.reports[req.params.id] = req.body;
       res.sendStatus(200);
@@ -65,16 +82,28 @@ serve = () => {
   // Send token to start test run for given report id
   app.post('/start/:id', jsonparser, (req, res) => {
     try {
+      db.active_report = req.params.id;
       db.token = req.body;
-      console.log('Sent new token & report');
-      io.emit('config', {
-        token: db.token,
-        report: db.reports[req.params.id],
-      });
+
+      if (!(db.active_report in db.reports)) {
+        return res.sendStatus(404);
+      }
+
+      // Trigger refresh on all clients
+      io.emit('refresh');
+
       res.sendStatus(200);
     } catch (e) {
       res.send(e);
     }
+  });
+
+  // Stop clients
+  app.post('/stop', jsonparser, (_, res) => {
+    db.active_report = '_';
+    // Trigger refresh on all clients
+    io.emit('refresh');
+    res.sendStatus(200);
   });
 
   // Socket connection to gather the metrics
@@ -84,7 +113,7 @@ serve = () => {
 
     socket.emit('config', {
       token: db.token,
-      report: db.report,
+      report: db.reports[db.active_report],
     });
 
     socket.on('metric', (data) => {

@@ -24,6 +24,10 @@ function GetQSParam(name, url) {
   return results[1] || 0;
 }
 
+socket.on('refresh', () => {
+  location.reload();
+});
+
 socket.on('config', (data) => {
   var token = data.token;
   var reportParameters = data.report;
