@@ -38,29 +38,38 @@ serve = () => {
     res.sendFile(path.resolve('index.html'));
   });
 
-  // Endpoint for updating token
-  app.post('/token', jsonparser, (req, res) => {
+  // Get saved reports
+  app.get('/report', (_, res) => {
+    res.send(db.reports || {});
+  });
+
+  // Remove report by id
+  app.delete('/report/:id', (req, res) => {
+    delete db.reports[req.params.id];
+    res.sendStatus(200);
+  });
+
+  // Save report by id
+  app.post('/report/:id', jsonparser, (req, res) => {
+    if (!db.reports) {
+      db.reports = {};
+    }
     try {
-      db.token = req.body;
-      console.log('Sent new token');
-      io.emit('config', {
-        token: db.token,
-        report: db.report,
-      });
+      db.reports[req.params.id] = req.body;
       res.sendStatus(200);
     } catch (e) {
       res.send(e);
     }
   });
 
-  // Endpoint for updating report
-  app.post('/report', jsonparser, (req, res) => {
+  // Send token to start test run for given report id
+  app.post('/start/:id', jsonparser, (req, res) => {
     try {
-      db.report = req.body;
-      console.log('Sent new report');
+      db.token = req.body;
+      console.log('Sent new token & report');
       io.emit('config', {
         token: db.token,
-        report: db.report,
+        report: db.reports[req.params.id],
       });
       res.sendStatus(200);
     } catch (e) {
