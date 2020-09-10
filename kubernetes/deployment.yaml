@@ -1,0 +1,24 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: clients
+spec:
+  selector:
+    matchLabels:
+      app: client
+  replicas: $NR_CLIENTS
+  template:
+    metadata:
+      labels:
+        app: client
+    spec:
+      containers:
+        - name: client
+          image: menziess/shadow-firefox
+          env:
+            - name: WEBPAGE_URL
+              value: http://$NAME.westeurope.azurecontainer.io
+          resources:
+            requests:
+              memory: '100M'
+              cpu: '0.1'

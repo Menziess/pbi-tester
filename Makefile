@@ -8,6 +8,7 @@ AZ_LOCATION=westeurope
 DOCKER_REGISTRY=mydockeruser
 ACI_CPU=2
 ACI_MEMORY=3
+NR_CLIENTS=20
 
 
 help:
@@ -24,21 +25,34 @@ dev:
 
 dockerize:
 	docker build --rm -f "Dockerfile" -t \
-  $$DOCKER_REGISTRY/$$NAME .
+  	$$DOCKER_REGISTRY/$$NAME .
 
 publish:
 	docker push $$DOCKER_REGISTRY/$$NAME:latest
 
-run-server: dockerize
+run: dockerize
 	mkdir -p logs
-	docker run --rm -it \
+
+	docker network create tmp || true
+
+	docker run --rm -d --name server \
+		--network tmp \
+		-p 3000:80 \
 		-e ENV=production \
-		-p 80:80 \
-		-v /private:/app/private
 		$$DOCKER_REGISTRY/$$NAME:latest
 
-run-client:
-	docker run -d --rm menziess/pbi-tab
+	docker run -d --rm --name client \
+		--network tmp \
+		-p 6080:80 \
+		-e WEBPAGE_URL='http://server' \
+		menziess/shadow-firefox
+
+	@echo Press ENTER to stop
+	@read button
+	@echo Stopping containers, removing tmp network...
+	@docker container stop server client
+	@docker network rm tmp
+
 
 deploy-server:
 	@echo Deploying to $$AZ_SUBSCRIPTION
@@ -92,7 +106,7 @@ deploy-client:
 		--name $$NAME
 		--overwrite-existing
 
-	kubectl apply -f client-deployment.yaml
+	envsubst < kubernetes/deployment.yaml | kubectl apply -f -
 
 generate-token:
 	@echo 1. Install powershell for linux https://docs.microsoft.com/en-us/powershell/scripting/install/installing-powershell-core-on-linux?view=powershell-7
