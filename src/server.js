@@ -12,6 +12,7 @@ const jsonparser = bodyparser.json();
 
 // Set port for server
 const port = process.env.PORT || 80;
+const debug = process.env.DEBUG || false;
 
 // Read reports.json to pre-populate available reports
 const reports = () => {
@@ -140,7 +141,7 @@ serve = () => {
   // Start server
   http.listen(port, () => {
     const url = `http://localhost:${port}`;
-    promptOpenUrlInNumerousTabs(url);
+    if (debug) promptOpenUrlInNumerousTabs(url);
     console.log(`listening on ${url}`);
   });
 };
