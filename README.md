@@ -71,8 +71,8 @@ After you've set a token and active report using the `/start/:id` POST endpoint,
 The refresh-time metrics of your browser are logged to a file in [`logs/log.json`](logs/log.json) inside your mounted storage account:
 
 ```json
-{"tabId":"05d45e65-789b","loadCounter":1,"avgDuration":3.066,"currDuration":3.066,"thinkTimeSeconds":1,"timeStamp":"2020-06-30T13:54:57.750Z"},
-{"tabId":"05d45e65-789b","loadCounter":2,"avgDuration":2.401,"currDuration":1.736,"thinkTimeSeconds":1,"timeStamp":"2020-06-30T13:55:00.485Z"},
+{ "tabId": "05d45e65-789b", "loadCounter":1, "avgDuration":3.066, "currDuration":3.066, "thinkTimeSeconds":1, "timeStamp":"2020-06-30T13:54:57.750Z" },
+{ "tabId": "05d45e65-789b", "loadCounter":2, "avgDuration":2.401, "currDuration":1.736, "thinkTimeSeconds":1, "timeStamp":"2020-06-30T13:55:00.485Z" },
 ```
 
 ## 4. Client Usage
@@ -91,5 +91,3 @@ Clients are loyal subjects with the single task of loading the webpage that is s
 - Fix the `az aks create` command in the Makefile
 - Starting multiple tabs per `pbi-tab` container
 - Using Web Workers to prevent background tabs to become idle
-- Improve script for tabs to wait until server becomes available so that a restart is not required
-- Improve kubernetes deployment for performance reasons
