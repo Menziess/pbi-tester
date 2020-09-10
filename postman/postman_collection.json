@@ -1,0 +1,166 @@
+{
+	"info": {
+		"_postman_id": "b41bdbb7-cfb9-4f04-ad1a-8b4a15ce6f1f",
+		"name": "PBI Stress Testing",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+	},
+	"item": [
+		{
+			"name": "Get report definitions",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "{{namespace}}/report",
+					"host": [
+						"{{namespace}}"
+					],
+					"path": [
+						"report"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Save report definition",
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n    \"reportUrl\": \"https://app.powerbi.com/reportEmbed?reportId=36621bde-4614-40df-8e08-79481d767bcb&groupId=dfbfe8ab-b93b-4345-8a43-655697ff36dd&w=2&config=eyJjbHVzdGVyVXJsIjoiaHR0cHM6Ly9XQUJJLVVTLU5PUlRILUNFTlRSQUwtcmVkaXJlY3QuYW5hbHlzaXMud2luZG93cy5uZXQifQ%3d%3d\",\r\n    \"pageName\": \"\",\r\n    \"bookmarkList\": [\r\n        \"Bookmark1d7f5476b91147a87955\",\r\n        \"Bookmark6a5ec58ce57e4f389ce5\"\r\n    ],\r\n    \"sessionRestart\": 100,\r\n    \"filters\": [\r\n        {\r\n            \"filterTable\": \"DimProductCategory\",\r\n            \"filterColumn\": \"Product Category\",\r\n            \"isSlicer\": true,\r\n            \"filtersList\": [\r\n                \"Accessories\",\r\n                \"Bikes\",\r\n                \"Clothing\"\r\n            ]\r\n        }\r\n    ]\r\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{namespace}}/report/:id",
+					"host": [
+						"{{namespace}}"
+					],
+					"path": [
+						"report",
+						":id"
+					],
+					"variable": [
+						{
+							"key": "id",
+							"value": "DemoLoadTest1",
+							"description": "Name of report."
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Delete report definition",
+			"request": {
+				"method": "DELETE",
+				"header": [],
+				"url": {
+					"raw": "{{namespace}}/report/:id",
+					"host": [
+						"{{namespace}}"
+					],
+					"path": [
+						"report",
+						":id"
+					],
+					"variable": [
+						{
+							"key": "id",
+							"value": "DemoLoadTest1",
+							"description": "Name of report."
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Start test run",
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\"PBIToken\":\"abcdefghijklmnopqrstuvwxyz0123456789\"}\r\n\r\n",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{namespace}}/start/:id",
+					"host": [
+						"{{namespace}}"
+					],
+					"path": [
+						"start",
+						":id"
+					],
+					"variable": [
+						{
+							"key": "id",
+							"value": "DemoLoadTest1",
+							"description": "Name of report."
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Stop test run",
+			"request": {
+				"method": "POST",
+				"header": [],
+				"url": {
+					"raw": "{{namespace}}/stop",
+					"host": [
+						"{{namespace}}"
+					],
+					"path": [
+						"stop"
+					]
+				}
+			},
+			"response": []
+		}
+	],
+	"event": [
+		{
+			"listen": "prerequest",
+			"script": {
+				"id": "d80bbecb-84c0-4c68-a7d1-a31fcdfba14d",
+				"type": "text/javascript",
+				"exec": [
+					""
+				]
+			}
+		},
+		{
+			"listen": "test",
+			"script": {
+				"id": "e320e910-02f5-4c95-aba4-c19d44f5e5c2",
+				"type": "text/javascript",
+				"exec": [
+					""
+				]
+			}
+		}
+	],
+	"variable": [
+		{
+			"id": "da333338-bf55-471b-ab8f-fd98f4e7d0f7",
+			"key": "namespace",
+			"value": "http://localhost:3000"
+		}
+	],
+	"protocolProfileBehavior": {}
+}
