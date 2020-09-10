@@ -52,7 +52,7 @@ serve = () => {
 
   // Just the index page
   app.get('/', (req, res) => {
-    res.sendFile(path.resolve('index.html'));
+    res.sendFile(path.resolve('public/index.html'));
   });
 
   // Get saved reports
