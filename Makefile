@@ -19,6 +19,7 @@ install:
 
 dev:
 	@echo please run \"export PORT=3000\"
+  mkdir -p logs
 	node src/server.js
 
 dockerize:
@@ -29,6 +30,7 @@ publish:
 	docker push $$DOCKER_REGISTRY/$$NAME:latest
 
 run-server: dockerize
+  mkdir -p logs
 	docker run --rm -it \
 		-e ENV=production \
 		-p 80:80 \
