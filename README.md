@@ -57,7 +57,7 @@ The server requires two things:
    ```bash
    powershell ./private/generate_token.ps1
    ```
-1. Deploy the solution, following the steps in [Development](#1.-development)
+1. Deploy the solution, following the steps in [Development](#1-development)
 1. If you haven't changed the `NAME` variable in the [`Makefile`](Makefile), you should be able to visit your powerbi tester page under: http://pbi-tester.westeurope.azurecontainer.io
 1. Importing the [`postman/postman_collection.json`](postman/postman_collection.json) file in [Postman](https://www.postman.com/), so you can interact with the server using the following endpoints:
    - GET [`/report`](http://localhost:3000/report) - Get available report definitions
