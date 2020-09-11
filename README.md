@@ -108,10 +108,10 @@ Done:
   - allow automatic refresh through websockets at client side
   - add postman collection
 - style consistency through editorconfig
+- Fix the `az aks create` command in the Makefile (use exported template, convert to `az` commands)
 
 Must have:
 
-- Fix the `az aks create` command in the Makefile (use exported template, convert to `az` commands)
 - Log pbi filter as part of metric
 - Fix cause of deleted and malformed lines in log file
 
