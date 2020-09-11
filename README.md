@@ -88,6 +88,40 @@ Clients are loyal subjects with the single task of loading the webpage that is s
 
 ## Improvements
 
-- Fix the `az aks create` command in the Makefile
-- Starting multiple tabs per `pbi-tab` container
-- Using Web Workers to prevent background tabs to become idle
+Done:
+
+- Improve script for tabs to wait until server becomes available so that a restart is not required
+- Improve kubernetes deployment for performance / configurability
+  - configurable url in Makefile
+  - configurable number of clients in Makefile
+- Making the url configurable for the `menziess/pbi-tab` container
+  - through env variables k8s
+  - through websockets
+- Store multiple report definitions in single file
+- Show no token / report error on dashboard page
+- Improve local debug deployment
+  - spin up both server and client
+  - allow host access to server + client simultaneously
+  - allow simple server with `n` number of local tabs
+- Add endpoints to configure server after it's deployed
+  - add endpoint to crud report definitions
+  - add endpoint to start and stop tests
+  - add endpoint to update token
+  - allow automatic refresh through websockets at client side
+  - add postman collection
+- style consistency through editorconfig
+
+Must have:
+
+- Fix the `az aks create` command in the Makefile (use exported template, convert to `az` commands)
+- Log pbi filter as part of metric
+- Fix cause of deleted and malformed lines in log file
+
+Nice to have:
+
+- Improve kubernetes deployment for performance / configurability
+  - Starting multiple tabs per `pbi-tab` container (`firefox url1 url2 url3`) in Makefile
+- Using Web Workers to prevent background tabs to become idle (required for the above)
+- Create UI page from which report definitions and token can be maintained (usability feature)
+- Create UI page from which AKS clusters can be maintained (usability feature)
+- change `log.json` to `YYYY-MM-DD HH:MM:SS.json`
