@@ -6,7 +6,7 @@ spec:
   selector:
     matchLabels:
       app: client
-  replicas: $NR_CLIENTS
+  replicas: $AKS_NR_CLIENTS
   template:
     metadata:
       labels:

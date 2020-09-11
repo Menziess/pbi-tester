@@ -1,10 +1,12 @@
 # [pbi-testing](/README.md)
 
-A nodejs **server** that serves an embedded powerbi dashboard that keeps refreshing itself, sending render-time metrics of all the **client(s)** that have loaded the dashboard back to the server, and writing them out to blob storage.
+A nodejs **server** that serves an embedded powerbi dashboard that keeps refreshing itself, sending render-time metrics of all connected **client(s)** back to the server, and writing them out to blob storage.
 
 <img src="res/testing-powerbi-reports.png" alt="Testing PowerBI reports overview" width="750"/>
 
 It's merely a infrastructural shell around the original [microsoft/PowerBI-Tools-For-Capacities](https://github.com/microsoft/PowerBI-Tools-For-Capacities) project to scale up/out, and a [`Makefile`](Makefile) allowing anyone to jump right in and fire up some stress tests.
+
+**Prerequisites:** wsl / linux, make, node, yarn, az-cli (last version), docker, Azure Resource Group, Azure Container Registry
 
 ## 1. Development
 
@@ -14,28 +16,24 @@ The [`Makefile`](Makefile) contains all required commands for building, publishi
 1. Start the server:
    ```bash
    export PORT=3000
+   export DEBUG=True
    make dev
    ```
-   or on Windows:
-   ```cmd
-   set PORT=3000
-   node src/server.js
-   ```
-1. Repeat step 2 after changing any server-side code.
-   Simply refresh your browser tab (using `CTRL + SHIFT + R`) when you're only modifying client-side code.
-1. Dockerize your changes (requires `docker`)
+1. Repeat step 2 after changing any javascript code.
+   Simply refresh your browser tab (using `CTRL + SHIFT + R`) when you're only modifying html / css
+1. Dockerize your changes (requires `docker`):
    ```bash
    make dockerize
    ```
-1. Spin up a container to see whether it functions
+1. Spin up a container to see whether it functions properly:
    ```bash
-   make run
+   make run-locally
    ```
-1. Push the changes to a docker registry (create the RG and registry manually, update the variables in the `Makefile`, you may have to run `az login` and `az acr login --name <acrname>` first)
+1. Push the changes to a docker registry (create the RG and registry manually, update the variables in the `Makefile`, you may have to run `az login` and `az acr login --name <acrname>` first):
    ```bash
    make publish
    ```
-1. Deploy your image to ACI (Azure Container Instances)
+1. Deploy your image to ACI (Azure Container Instances):
    ```bash
    make deploy-server
    ```
@@ -83,8 +81,8 @@ Clients are loyal subjects with the single task of loading the webpage that is s
    ```bash
    make deploy-client
    ```
-1. Make sure the right report definition is set, and the token has been refreshed.
-1. You may want to rename or delete any existing log file, as the metrics will simply be appended to any log file that already exists.
+1. Make sure the right report definition is set, and the token has been refreshed
+1. You may want to rename or delete any existing log file, as the metrics will simply be appended to any log file that already exists
 
 ## Improvements
 
